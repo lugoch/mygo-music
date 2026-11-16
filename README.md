@@ -224,3 +224,4 @@ Everything else takes a permission in `plugin.json`:
 ## License
 
 AGPL-3.0. See [LICENSE](LICENSE).
+test
