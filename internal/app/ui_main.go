@@ -372,6 +372,69 @@ func (a *app) pageTop(c *ui.Context) {
 			}
 		})
 	}
+	a.windowButtons(c)
+}
+
+// windowButtons draws the window controls at the top-right of a frameless
+// window on Linux, where the compositor would otherwise add its own title
+// bar. macOS and Windows show their native buttons.
+func (a *app) windowButtons(c *ui.Context) {
+	if runtime.GOOS != "linux" {
+		return
+	}
+	tb := topBar(c)
+	// The strip the buttons sit in: 28px tall, centered in the top bar,
+	// 8px from the right edge.
+	barH := float32(28)
+	top := (tb - barH) / 2
+
+	ui.Row(c).Absolute().Top(top).Right(8).Height(barH).AlignItems(ui.Center).Gap(4).Children(func() {
+		if a.win == nil {
+			return
+		}
+		// Minimize.
+		minBtn := winBtn(c.Key("win-min"), iconWinMinimize, a.pal.muted, T("Minimize"))
+		if minBtn.Clicked() {
+			a.win.Minimize()
+		}
+		// Maximize or restore.
+		maximized := a.win.IsMaximized()
+		icon := iconWinMaximize
+		label := T("Maximize")
+		if maximized {
+			icon = iconWinRestore
+			label = T("Restore")
+		}
+		maxBtn := winBtn(c.Key("win-max"), icon, a.pal.muted, label)
+		if maxBtn.Clicked() {
+			a.win.ToggleMaximize()
+		}
+		// Close: red on hover.
+		closeColor := a.pal.muted
+		closeBtn := winBtn(c.Key("win-close"), iconWinClose, a.pal.muted, T("Close"))
+		if closeBtn.Hovered() {
+			closeColor = ui.RGB(0xee, 0x3d, 0x38)
+		}
+		closeBtn.TextColor(closeColor)
+		if closeBtn.Clicked() {
+			// Hide after the frame, not quit: hiding inside this draw
+			// callback crashes GTK; the tray or a relaunch brings it back.
+			go a.win.Hide()
+		}
+	})
+}
+
+// winBtn is a small borderless button for the window controls, 28×28px
+// with the icon at 14px, the hover marking a soft rectangle.
+func winBtn(c *ui.Context, icon *ui.SVG, color ui.Color, label string) ui.Element {
+	b := ui.ButtonBase(c).Size(28, 28).Center().Radius(6).Label(label).TextColor(color)
+	bg := ui.Transparent
+	if b.Hovered() {
+		bg = ui.RGBA(128, 128, 128, 0.12)
+	}
+	b.Background(b.AnimateColor("bg", bg, ui.Animation{Duration: 120 * time.Millisecond}))
+	b.Children(func() { ui.Icon(c, icon).Size(14, 14) })
+	return b
 }
 
 func (a *app) content(c *ui.Context) {

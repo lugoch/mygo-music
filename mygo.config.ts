@@ -21,6 +21,13 @@ export default ({ command }: { command: string }) => ({
   linux: {
     comment: "A music player for your files and more",
     categories: ["AudioVideo", "Audio", "Player"],
-    webview: false,
+    // Plugin sign-in opens a WebKitGTK window, and the notification-area
+    // icon needs the appindicator library; keep both out of the way of
+    // the packages MyGo writes for us.
+    depends: {
+      deb: ["libayatana-appindicator3-1"],
+      rpm: ["libayatana-appindicator-gtk3"],
+      arch: ["libsecret", "libayatana-appindicator"],
+    },
   },
 });

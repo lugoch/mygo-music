@@ -361,13 +361,18 @@ func Run() error {
 		a.volume = a.settings.Volume
 		a.pl.SetVolume(a.volume)
 		a.win = mygo.NewWindow(mygo.WindowOptions{
-			Title:         mygo.App.Name(),
-			Width:         1180,
-			Height:        780,
-			MinWidth:      880,
-			MinHeight:     580,
-			StateKey:      "main",
-			TitleBarStyle: mygo.TitleBarHidden,
+			Title:     mygo.App.Name(),
+			Width:     1180,
+			Height:    780,
+			MinWidth:  880,
+			MinHeight: 580,
+			StateKey:  "main",
+			// Frameless on Linux: the compositor (KDE, Hyprland, Sway)
+			// decorates hidden-title-bar windows itself, so we hide the
+			// whole frame and draw our own window buttons.
+			Frameless:       runtime.GOOS == "linux",
+			AutoHideMenuBar: true,
+			TitleBarStyle:   mygo.TitleBarHidden,
 			// As tall as the edge over a page (Linux, Windows).
 			TitleBarHeight: buttonsHeight,
 			// Inset from the corner, within the sidebar, as macOS 26's

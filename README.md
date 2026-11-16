@@ -22,6 +22,18 @@ go tool mygo build   # package into build/
 go test ./internal/...
 ```
 
+### Arch Linux (pacman)
+
+`go tool mygo build` writes a `PKGBUILD` next to the Linux archive in `build/linux-<arch>/`. `makepkg` turns it into an installable pacman package:
+
+```bash
+go tool mygo build -platform linux/amd64
+cd build/linux-amd64 && makepkg -f
+sudo pacman -U mygo-music-0.1.25-1-x86_64.pkg.tar.zst
+```
+
+The Linux window is frameless on Linux (the compositor decorates hidden-title-bar windows itself), so the app draws its own minimize, maximize and close buttons in the top strip. On macOS and Windows the native window buttons stay.
+
 ## Podcast captions
 
 Episodes are written down on the device as they play, with [sherpa-onnx](https://github.com/k2-fsa/sherpa-onnx) and Qwen3-ASR, which the app downloads when the listener asks for them. The libraries come from this repository's `sherpa-onnx-<version>` prerelease, which only changes with that version:
